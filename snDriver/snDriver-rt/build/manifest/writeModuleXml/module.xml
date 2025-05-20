@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="snDriver-rt" bajaVersion="0" vendor="Mayvel" vendorVersion="1.0" description="snDriver for call apis,Expose alarm,history details,create schedules." preferredSymbol="snd" nre="true" autoload="true" installable="true" buildMillis="%%BUILD_MILLIS%%" buildHost="SHKTPVMUI017" moduleName="snDriver" runtimeProfile="rt">
+ <dependencies>
+  <dependency name="alarm-rt" vendor="Tridium" vendorVersion="4.14"/>
+  <dependency name="baja" vendor="Tridium" vendorVersion="4.14"/>
+  <dependency name="bql-rt" vendor="Tridium" vendorVersion="4.14"/>
+  <dependency name="control-rt" vendor="Tridium" vendorVersion="4.14"/>
+  <dependency name="driver-rt" vendor="Tridium" vendorVersion="4.14"/>
+  <dependency name="history-rt" vendor="Tridium" vendorVersion="4.14"/>
+  <dependency name="ndriver-rt" vendor="Tridium" vendorVersion="4.14"/>
+  <dependency name="schedule-rt" vendor="Tridium" vendorVersion="4.14"/>
+ </dependencies>
+ <dirs/>
+ <installation/>
+ <types>
+  <type class="com.mayvel.snDriver.BSnDriver" name="SnDriver"/>
+  <type class="com.mayvel.snDriver.BSnDriverDevice" name="SnDriverDevice"/>
+  <type class="com.mayvel.snDriver.BSnDriverDeviceFolder" name="SnDriverDeviceFolder"/>
+  <type class="com.mayvel.snDriver.BSnDriverNetwork" name="SnDriverNetwork"/>
+  <type class="com.mayvel.snDriver.BSnAlarm" name="SnAlarm"/>
+  <type class="com.mayvel.snDriver.BSnHistory" name="SnHistory"/>
+  <type class="com.mayvel.snDriver.BSnScheduler" name="SnScheduler"/>
+  <type class="com.mayvel.snDriver.BSnHttpClient" name="SnHttpClient"/>
+  <type class="com.mayvel.snDriver.point.BSnDriverPointDeviceExt" name="SnDriverPointDeviceExt"/>
+  <type class="com.mayvel.snDriver.point.BSnDriverPointDiscoveryLeaf" name="SnDriverPointDiscoveryLeaf"/>
+  <type class="com.mayvel.snDriver.point.BSnDriverPointDiscoveryPreferences" name="SnDriverPointDiscoveryPreferences"/>
+  <type class="com.mayvel.snDriver.point.BSnDriverPointFolder" name="SnDriverPointFolder"/>
+  <type class="com.mayvel.snDriver.point.BSnDriverProxyExt" name="SnDriverProxyExt"/>
+ </types>
+ <permissions>
+  <niagara-permission-groups type="all"/>
+  <niagara-permission-groups type="workbench"/>
+  <niagara-permission-groups type="station">
+   <req-permission>
+    <name>NETWORK_COMMUNICATION</name>
+    <purposeKey>Outside access for Driver</purposeKey>
+    <parameters>
+     <parameter name="hosts" value="*"/>
+     <parameter name="ports" value="*"/>
+     <parameter name="type" value="all"/>
+    </parameters>
+   </req-permission>
+   <req-permission>
+    <name>KEY_STORE</name>
+    <purposeKey>keyStore.purpose</purposeKey>
+    <parameters>
+     <parameter name="keystores" value="*"/>
+     <parameter name="actions" value="read"/>
+    </parameters>
+   </req-permission>
+   <req-permission>
+    <name>KEY_STORE</name>
+    <purposeKey>keyStore.purpose</purposeKey>
+    <parameters>
+     <parameter name="keystores" value="*"/>
+     <parameter name="actions" value="write"/>
+    </parameters>
+   </req-permission>
+  </niagara-permission-groups>
+ </permissions>
+</module>

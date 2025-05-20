@@ -1,0 +1,18 @@
+<types>
+  <!--com.mayvel.snDriver-->
+  <type class="com.mayvel.snDriver.BSnDriver" name="SnDriver"/>
+  <type class="com.mayvel.snDriver.BSnDriverDevice" name="SnDriverDevice"/>
+  <type class="com.mayvel.snDriver.BSnDriverDeviceFolder" name="SnDriverDeviceFolder"/>
+  <type class="com.mayvel.snDriver.BSnDriverNetwork" name="SnDriverNetwork"/>
+  <type class="com.mayvel.snDriver.BSnAlarm" name="SnAlarm"/>
+  <type class="com.mayvel.snDriver.BSnHistory" name="SnHistory"/>
+  <type class="com.mayvel.snDriver.BSnScheduler" name="SnScheduler"/>
+  <type class="com.mayvel.snDriver.BSnHttpClient" name="SnHttpClient"/>
+  <!--com.mayvel.snDriver.point-->
+  <type class="com.mayvel.snDriver.point.BSnDriverPointDeviceExt" name="SnDriverPointDeviceExt"/>
+  <type class="com.mayvel.snDriver.point.BSnDriverPointDiscoveryLeaf" name="SnDriverPointDiscoveryLeaf"/>
+  <type class="com.mayvel.snDriver.point.BSnDriverPointDiscoveryPreferences" name="SnDriverPointDiscoveryPreferences"/>
+  <type class="com.mayvel.snDriver.point.BSnDriverPointFolder" name="SnDriverPointFolder"/>
+  <type class="com.mayvel.snDriver.point.BSnDriverProxyExt" name="SnDriverProxyExt"/>
+  <!--dtl-->
+</types>
