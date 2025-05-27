@@ -31,5 +31,14 @@
         <parameter name="actions" value="write"/>
       </parameters>
     </req-permission>
+  <req-permission>
+    <name>FILE_ACCESS</name>
+    <purposeKey>Access license key file</purposeKey>
+    <parameters>
+      <parameter name="files" value="modules/snDriver/-"/>
+      <parameter name="actions" value="read"/>
+    </parameters>
+  </req-permission>
   </niagara-permission-groups>
+
 </permissions>

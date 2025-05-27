@@ -2,7 +2,8 @@
 <bajaObjectGraph version="4.0" reversibleEncodingKeySource="none" reversibleEncodingValidator="[null.1]=" >
 
   <p m="b=baja" t="b:UnrestrictedFolder" n="RootFolder">
-      <p m="b=baja" t="b:UnrestrictedFolder" n="SnDriver">
+      <!-- Instantiate your BSnDriver component here -->
+      <p m="mayvel=snDriver" t="mayvel:SnDriver" n="SnDriver">
       <p m="dtl=snDriver" t="dtl:SnHttpClient" n="SnHttpClient" />
       <p m="dtl=snDriver" t="dtl:SnAlarm" n="SnAlarm" />
       <p m="dtl=snDriver" t="dtl:SnHistory" n="SnHistory" />
