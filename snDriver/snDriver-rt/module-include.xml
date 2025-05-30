@@ -8,6 +8,7 @@
   <type class="com.mayvel.snDriver.BSnHistory" name="SnHistory"/>
   <type class="com.mayvel.snDriver.BSnScheduler" name="SnScheduler"/>
   <type class="com.mayvel.snDriver.BSnHttpClient" name="SnHttpClient"/>
+  <type class="com.mayvel.snDriver.BSnSwitch" name="SnSwitch"/>
   <!--com.mayvel.snDriver.point-->
   <type class="com.mayvel.snDriver.point.BSnDriverPointDeviceExt" name="SnDriverPointDeviceExt"/>
   <type class="com.mayvel.snDriver.point.BSnDriverPointDiscoveryLeaf" name="SnDriverPointDiscoveryLeaf"/>

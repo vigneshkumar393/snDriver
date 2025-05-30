@@ -321,24 +321,6 @@ public class BSnScheduler extends BComponent {
         // Add time range to correct weekday
         BDaySchedule daySchedule = schedule.get(bWeekday);
 
-// Get the schedules sorted in order
-        BTimeSchedule[] schedules = daySchedule.getTimesInOrder();
-
-        for (int i = 0; i < schedules.length; i++) {
-          BTimeSchedule bTimeSchedule = schedules[i];
-
-          // Get the start and end times of the current schedule
-          BTime stTime = bTimeSchedule.getStart();
-          BTime edTime = bTimeSchedule.getFinish();
-
-          // Compare the start and end times with the input values
-          if (stTime.equals(startTime) && edTime.equals(endTime)) {
-            // Remove the schedule if it matches the given time range
-            daySchedule.remove(bTimeSchedule);
-            break; // Exit the loop after the schedule is removed
-          }
-        }
-
         daySchedule.add(startTime, endTime, statusValue);
 
         setScheduleOut("✅ Schedule set on " + bWeekday + " from " + getScheduleStartTime() + " to " + getScheduleEndTime());
