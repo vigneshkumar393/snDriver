@@ -1,6 +1,7 @@
 package com.mayvel.snDriver;
 
 import com.mayvel.snDriver.utils.Logger;
+import com.tridium.json.JSONObject;
 
 import javax.baja.naming.BOrd;
 import javax.baja.nre.annotations.NiagaraAction;
@@ -14,8 +15,7 @@ import javax.baja.status.BStatusBoolean;
 import javax.baja.sys.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 @NiagaraType
 // Schedule properties
@@ -49,14 +49,20 @@ import java.util.Date;
         defaultValue = "",
         flags = Flags.READONLY | Flags.SUMMARY
 )
+@NiagaraProperty(
+        name = "scheduleObject",
+        type = "String",
+        defaultValue = "",
+        flags = Flags.SUMMARY
+)
 @NiagaraAction(
         name = "scheduleClearAll")
 @NiagaraAction(name = "scheduleCreate")
 public class BSnScheduler extends BComponent {
 //region /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 //@formatter:off
-/*@ $com.mayvel.snDriver.BSnScheduler(297064012)1.0$ @*/
-/* Generated Tue May 20 10:01:18 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
+/*@ $com.mayvel.snDriver.BSnScheduler(3237465027)1.0$ @*/
+/* Generated Mon Jun 02 15:12:20 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
 
   //region Property "schedulePath"
 
@@ -176,6 +182,29 @@ public class BSnScheduler extends BComponent {
 
   //endregion Property "scheduleOut"
 
+  //region Property "scheduleObject"
+
+  /**
+   * Slot for the {@code scheduleObject} property.
+   * @see #getScheduleObject
+   * @see #setScheduleObject
+   */
+  public static final Property scheduleObject = newProperty(Flags.SUMMARY, "", null);
+
+  /**
+   * Get the {@code scheduleObject} property.
+   * @see #scheduleObject
+   */
+  public String getScheduleObject() { return getString(scheduleObject); }
+
+  /**
+   * Set the {@code scheduleObject} property.
+   * @see #scheduleObject
+   */
+  public void setScheduleObject(String v) { setString(scheduleObject, v, null); }
+
+  //endregion Property "scheduleObject"
+
   //region Action "scheduleClearAll"
 
   /**
@@ -222,27 +251,39 @@ public class BSnScheduler extends BComponent {
   // Schdule methods
   public void doScheduleClearAll() {
     Logger.Log("BSNGroup schedule action triggered");
-
-    try {
-      // Use the full path to the schedule in the station
-      String schedulePath = getSchedulePath();
-      BOrd remoteOrd = BOrd.make(schedulePath);
-      BObject obj = remoteOrd.resolve().get();
-      if (obj instanceof BBooleanSchedule) {
-        BBooleanSchedule schedule = (BBooleanSchedule) obj;
-        // Clear the schedule
-        schedule.clear();
-        setScheduleOut("Successfully cleared schedule at path: " + schedulePath);
-      } else {
-        setScheduleOut("Component at path is not a BBooleanSchedule.");
+    String[] paths = getAllBooleanSchedulePaths();
+    for (String path:
+         paths) {
+      try {
+        // Use the full path to the schedule in the station
+        String schedulePath = path;
+        BOrd remoteOrd = BOrd.make(schedulePath);
+        BObject obj = remoteOrd.resolve().get();
+        if (obj instanceof BBooleanSchedule) {
+          BBooleanSchedule schedule = (BBooleanSchedule) obj;
+          // Clear the schedule
+          schedule.clear();
+          setScheduleOut("Successfully cleared schedule at path: " + schedulePath);
+        } else {
+          setScheduleOut("Component at path is not a BBooleanSchedule.");
+        }
+      } catch (Exception e) {
+        setScheduleOut("Failed to clear schedule: " + e.getMessage());
+        e.printStackTrace();
       }
-    } catch (Exception e) {
-      setScheduleOut("Failed to clear schedule: " + e.getMessage());
-      e.printStackTrace();
     }
   }
 
   public void doScheduleCreate() {
+    if(getScheduleObject().isEmpty()){
+      scheduleCreateBasedOnInput();
+    }else{
+      scheduleCreateBasedOnJson();
+    }
+
+  }
+
+  public void scheduleCreateBasedOnInput(){
     new Thread(() -> {
       try {
         String path = getSchedulePath();
@@ -321,6 +362,24 @@ public class BSnScheduler extends BComponent {
         // Add time range to correct weekday
         BDaySchedule daySchedule = schedule.get(bWeekday);
 
+        // Get the schedules sorted in order
+        BTimeSchedule[] schedules = daySchedule.getTimesInOrder();
+
+        for (int i = 0; i < schedules.length; i++) {
+          BTimeSchedule bTimeSchedule = schedules[i];
+
+          // Get the start and end times of the current schedule
+          BTime stTime = bTimeSchedule.getStart();
+          BTime edTime = bTimeSchedule.getFinish();
+
+          // Compare the start and end times with the input values
+          if (stTime.equals(startTime) && edTime.equals(endTime)) {
+            // Remove the schedule if it matches the given time range
+            daySchedule.remove(bTimeSchedule);
+            break; // Exit the loop after the schedule is removed
+          }
+        }
+
         daySchedule.add(startTime, endTime, statusValue);
 
         setScheduleOut("✅ Schedule set on " + bWeekday + " from " + getScheduleStartTime() + " to " + getScheduleEndTime());
@@ -338,8 +397,246 @@ public class BSnScheduler extends BComponent {
     }, "ScheduleStateThread").start();
   }
 
+  public void scheduleCreateBasedOnJson() {
+    new Thread(() -> {
+      try {
+        String scheduleJson = getScheduleObject();  // Assuming this returns your schedule JSON string
+
+        String[] paths = getMatchingSchedulePaths(scheduleJson);
+        setScheduleOut("PATHS: " + Arrays.toString(paths));
+        String startTimeVal = getFromDate(scheduleJson);
+        String toTimeVal = getToDate(scheduleJson);
+
+        for (String path:paths) {
+          BOrd ord = BOrd.make(path);
+          BObject obj = ord.resolve().get();
+
+          if (!(obj instanceof BBooleanSchedule)) {
+            setScheduleOut("❌ Target is not a BBooleanSchedule: " + path);
+            return;
+          }
+
+          BBooleanSchedule schedule = (BBooleanSchedule) obj;
+
+          // Parse the input start and end times
+          //SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh:mm:ss a", Locale.ENGLISH);
+          SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+          Date startDate = sdf.parse(startTimeVal);
+          Date endDate = sdf.parse(toTimeVal);
+
+          Calendar startCal = Calendar.getInstance();
+          startCal.setTime(startDate);
+
+          Calendar endCal = Calendar.getInstance();
+          endCal.setTime(endDate);
+
+          // Create BTime for start and end times
+          BTime startTime = BTime.make(
+                  startCal.get(Calendar.HOUR_OF_DAY),
+                  startCal.get(Calendar.MINUTE),
+                  startCal.get(Calendar.SECOND)
+          );
+
+          BTime endTime = BTime.make(
+                  endCal.get(Calendar.HOUR_OF_DAY),
+                  endCal.get(Calendar.MINUTE),
+                  endCal.get(Calendar.SECOND)
+          );
+
+          // Get day of the week (1 = Sunday, 2 = Monday, ..., 7 = Saturday)
+          int dayOfWeek = startCal.get(Calendar.DAY_OF_WEEK);
+          BWeekday bWeekday = null;
+
+          switch (dayOfWeek) {
+            case Calendar.SUNDAY:
+              bWeekday = BWeekday.sunday;
+              break;
+            case Calendar.MONDAY:
+              bWeekday = BWeekday.monday;
+              break;
+            case Calendar.TUESDAY:
+              bWeekday = BWeekday.tuesday;
+              break;
+            case Calendar.WEDNESDAY:
+              bWeekday = BWeekday.wednesday;
+              break;
+            case Calendar.THURSDAY:
+              bWeekday = BWeekday.thursday;
+              break;
+            case Calendar.FRIDAY:
+              bWeekday = BWeekday.friday;
+              break;
+            case Calendar.SATURDAY:
+              bWeekday = BWeekday.saturday;
+              break;
+          }
+
+          if (bWeekday == null) {
+            setScheduleOut("❌ Could not determine day of week.");
+            return;
+          }
+
+          // Create status value
+          BStatusBoolean statusValue = new BStatusBoolean(getScheduleValueToSet(), BStatus.ok);
+
+          // Add time range to correct weekday
+          BDaySchedule daySchedule = schedule.get(bWeekday);
+
+          // Get the schedules sorted in order
+          BTimeSchedule[] schedules = daySchedule.getTimesInOrder();
+
+          for (int i = 0; i < schedules.length; i++) {
+            BTimeSchedule bTimeSchedule = schedules[i];
+
+            // Get the start and end times of the current schedule
+            BTime stTime = bTimeSchedule.getStart();
+            BTime edTime = bTimeSchedule.getFinish();
+
+            // Compare the start and end times with the input values
+            if (stTime.equals(startTime) && edTime.equals(endTime)) {
+              // Remove the schedule if it matches the given time range
+              daySchedule.remove(bTimeSchedule);
+              break; // Exit the loop after the schedule is removed
+            }
+          }
+
+          daySchedule.add(startTime, endTime, statusValue);
+
+          String scheduleResultJson = String.format(
+                  "{ \"fromTime\": \"%s\", \"toTime\": \"%s\", \"status\": \"%s\", \"id\": \"%s\" }",
+                  startTimeVal,
+                  toTimeVal,
+                  "Success",
+                  getId(getScheduleObject()) // or any unique ID you want to use
+          );
+          setScheduleOut(scheduleResultJson);
+
+          Logger.Log("✅ Scheduled on " + bWeekday + " from " + startTime + " to " + endTime);
+        }
+
+      } catch (Exception e) {
+        setScheduleOut("❌ Failed to create schedule: " + e.getMessage());
+        Logger.Log("❌ Failed to create schedule: " + e.getMessage());
+        e.printStackTrace();
+      }
+    }, "ScheduleStateThread").start();
+  }
+
   @Override
   public void stopped() throws Exception {
     super.stopped();
   }
+
+  public String[] getMatchingSchedulePaths(String scheduleObjectJson) {
+    List<String> matchedPaths = new ArrayList<>();
+
+    try {
+      // Parse JSON
+      JSONObject obj = new JSONObject(scheduleObjectJson);
+
+      // Get niagara_tag string and split into individual tags
+      String niagaraTagStr = obj.optString("niagara_tag", "");
+      if (niagaraTagStr.isEmpty()) {
+        Logger.Log("⚠️ No niagara_tag provided.");
+        setScheduleOut("⚠️ No niagara_tag provided.");
+        return new String[0];
+      }
+
+      // Build tag set for fast lookup
+      Set<String> tags = new HashSet<>();
+      for (String tag : niagaraTagStr.split(",")) {
+        tags.add(tag.trim());
+      }
+
+      Logger.Log("🔍 Looking for tags: " + tags);
+
+      // Traverse sibling components and collect matches
+      BComponent container = (BComponent) this.getParent();
+      for (BComponent comp : container.getChildComponents()) {
+        if (comp instanceof BBooleanSchedule) {
+          BBooleanSchedule scheduler = (BBooleanSchedule) comp;
+          String name = scheduler.getName();
+          String actualName = name.startsWith("BS_") ? name.substring(3) : name;
+          if (tags.contains(actualName)) {
+            Logger.Log("✅ Match found: " + tags + " => " + actualName);
+            String path = scheduler.getSlotPath().toString();  // Assumes this method exists
+            if (path != null && !path.isEmpty()) {
+              matchedPaths.add("station:|"+path);
+              Logger.Log("✅ Match found: " + actualName + " => " + path);
+            }
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      Logger.Log("❌ Error parsing JSON or matching tags: " + e.getMessage());
+      setScheduleOut("❌ Error parsing JSON or matching tags.");
+      e.printStackTrace();
+    }
+
+    return matchedPaths.toArray(new String[0]);
+  }
+
+  public String getFromDate(String scheduleObjectJson) {
+    try {
+      JSONObject obj = new JSONObject(scheduleObjectJson);      return obj.optString("booking_from", "");
+    } catch (Exception e) {
+      setScheduleOut("❌ Error parsing booking_from");
+
+      e.printStackTrace();
+      return "";
+    }
+  }
+
+  public String getToDate(String scheduleObjectJson) {
+    try {
+      JSONObject obj = new JSONObject(scheduleObjectJson);      return obj.optString("booking_to", "");
+    } catch (Exception e) {
+      setScheduleOut("❌ Error parsing booking_to");
+      e.printStackTrace();
+      return "";
+    }
+  }
+
+
+  public String getId(String scheduleObjectJson) {
+    try {
+      JSONObject obj = new JSONObject(scheduleObjectJson);
+      return obj.optString("sys_id", "");
+    } catch (Exception e) {
+      setScheduleOut("❌ Error parsing sys_id");
+      e.printStackTrace();
+      return "";
+    }
+  }
+
+  public String[] getAllBooleanSchedulePaths() {
+    List<String> allPaths = new ArrayList<>();
+
+    try {
+      BComponent container = (BComponent) this.getParent();
+
+      for (BComponent comp : container.getChildComponents()) {
+        if (comp instanceof BBooleanSchedule) {
+          BBooleanSchedule schedule = (BBooleanSchedule) comp;
+
+          // Get full slot path as string
+          String path = schedule.getSlotPath().toString();
+
+          if (path != null && !path.isEmpty()) {
+            allPaths.add("station:|"+path);
+            Logger.Log("✅ Found BooleanSchedule: " + path);
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      Logger.Log("❌ Error collecting BBooleanSchedule paths: " + e.getMessage());
+      e.printStackTrace();
+    }
+
+    return allPaths.toArray(new String[0]);
+  }
+
 }
