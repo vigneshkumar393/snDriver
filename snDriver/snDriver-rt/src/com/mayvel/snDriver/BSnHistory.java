@@ -9,6 +9,7 @@ import javax.baja.history.*;
 import javax.baja.history.db.BHistoryDatabase;
 import javax.baja.naming.BOrd;
 import javax.baja.nre.annotations.Facet;
+import javax.baja.nre.annotations.NiagaraAction;
 import javax.baja.nre.annotations.NiagaraProperty;
 import javax.baja.nre.annotations.NiagaraType;
 import javax.baja.sys.*;
@@ -34,7 +35,7 @@ public class BSnHistory extends BComponent {
 //region /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 //@formatter:off
 /*@ $com.mayvel.snDriver.BSnHistory(1025315689)1.0$ @*/
-/* Generated Tue May 20 10:01:18 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
+/* Generated Tue Jun 03 10:30:38 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
 
   //region Property "historySource"
 

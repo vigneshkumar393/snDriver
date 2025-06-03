@@ -98,84 +98,83 @@ public class HistoryDBHelper {
 
     public static Map<String, Object> GetAllHistory(String StartTime, String EndTime, String limit, String offset, String historySource, String filterValues, boolean firstAndLastOnly) {
         Map<String, Object> responseMap = new HashMap<>();
-        List<Map<String, String>> resultList = new ArrayList<>();
-        //int lim = Integer.parseInt(limit);
-        //int off = Integer.parseInt(offset);
+        Map<String, List<Map<String, String>>> historyRecordsMap = new LinkedHashMap<>();
         int totalRecords = 0;
         int totalScanned = 0;
-        StringBuilder historyGrp = new StringBuilder();
+
         try {
             BHistoryService historyService = (BHistoryService) Sys.getService(BHistoryService.TYPE);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yy hh:mm:ss a");
-            LocalDateTime startDateTime = LocalDateTime.parse(StartTime, formatter);
-            LocalDateTime endDateTime = LocalDateTime.parse(EndTime, formatter);
-
             if (historyService == null) {
                 Logger.Error("History service not available");
                 responseMap.put("error", "History service not available");
                 return responseMap;
             }
 
-            BHistoryDatabase db = historyService.getDatabase();
-            String path = historySource;
-            BOrd ord = BOrd.make(path);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yy hh:mm:ss a");
+            LocalDateTime startDateTime = LocalDateTime.parse(StartTime, formatter);
+            LocalDateTime endDateTime = LocalDateTime.parse(EndTime, formatter);
 
-            BIHistory history = (BIHistory) ord.resolve().get();
-            Logger.Log("2  History resolved successfully");
-            BHistoryConfig config = history.getConfig();
-            db.setConfig(config);
-            BHistoryId historyId = config.getId();
-            db.getSystemTable(String.valueOf(historyId));
-            Logger.Log("3  History resolved successfully");
-            BIHistory[] tablesRecord = db.getHistories();
-
-            for (int i = 0; i < tablesRecord.length; i++) {
-                BIHistory hist = tablesRecord[i];
-                historyGrp.append(hist.getId().toString());
-                if (i < tablesRecord.length - 1) {
-                    historyGrp.append(", ");
+            String[] historyNames = historySource.split(",");
+            for (String historyName : historyNames) {
+                historyName = historyName.trim();
+                String path = getHistoryPathByName(historyName);
+                if (path == null) {
+                    Logger.Log("History not found for: " + historyName);
+                    continue;
                 }
 
-                // Check for the /NetCool/TestPoint01 table
-                if (hist.getId().toString().equals(extractPath(historySource))) {
-                    HistoryDatabaseConnection conn = historyService.getDatabase().getDbConnection(null);
-                    Cursor<BHistoryRecord> cursor = conn.scan(hist);
-                    List<Map<String, String>> tempFiltered = new ArrayList<>();
+                BOrd ord = BOrd.make(path);
+                BIHistory history = (BIHistory) ord.resolve().get();
+                BHistoryConfig config = history.getConfig();
+                BHistoryDatabase db = historyService.getDatabase();
+                db.setConfig(config);
+                BHistoryId historyId = config.getId();
+                db.getSystemTable(String.valueOf(historyId));
 
-                    while (cursor.next()) {
-                        try {
-                            totalScanned++;
-                            BHistoryRecord record = cursor.get();
-                            BAbsTime timeStamp = record.getTimestamp();
-                            String formattedTimeStampValue = Generic.formatTimeStamp(timeStamp);;
-                            LocalDateTime alarmDateTime = LocalDateTime.parse(formattedTimeStampValue, formatter);
-                            if ((alarmDateTime.isAfter(startDateTime) || alarmDateTime.equals(startDateTime))
-                                    && (alarmDateTime.isBefore(endDateTime) || alarmDateTime.equals(endDateTime))) {
-                                totalRecords++;
-                                Map<String, String> recordMap = convertToSyncallMap(record, filterValues);
-                                if (firstAndLastOnly) {
-                                    tempFiltered.add(recordMap);
-                                } else {
-                                    // Uncomment below to apply limit/offset if needed
-                                    // if (totalRecords > off && resultList.size() < lim) {
-                                    resultList.add(recordMap);
-                                    // }
+                BIHistory[] tablesRecord = db.getHistories();
+                for (BIHistory hist : tablesRecord) {
+                    if (hist.getId().toString().equals(extractPath(path))) {
+                        HistoryDatabaseConnection conn = db.getDbConnection(null);
+                        Cursor<BHistoryRecord> cursor = conn.scan(hist);
+
+                        List<Map<String, String>> resultList = new ArrayList<>();
+                        List<Map<String, String>> tempFiltered = new ArrayList<>();
+
+                        while (cursor.next()) {
+                            try {
+                                totalScanned++;
+                                BHistoryRecord record = cursor.get();
+                                String formattedTime = Generic.formatTimeStamp(record.getTimestamp());
+                                LocalDateTime recordTime = LocalDateTime.parse(formattedTime, formatter);
+
+                                if ((recordTime.isAfter(startDateTime) || recordTime.equals(startDateTime)) &&
+                                        (recordTime.isBefore(endDateTime) || recordTime.equals(endDateTime))) {
+
+                                    totalRecords++;
+                                    Map<String, String> recordMap = convertToSyncallMap(record, filterValues);
+                                    if (firstAndLastOnly) {
+                                        tempFiltered.add(recordMap);
+                                    } else {
+                                        resultList.add(recordMap);
+                                    }
                                 }
+                            } catch (Exception e) {
+                                Logger.Error("Record parse error: " + e.getMessage());
                             }
-                        } catch (Exception e) {
-                            Logger.Error(e.getMessage());
                         }
-                    }
-                    if (firstAndLastOnly && !tempFiltered.isEmpty()) {
-                        resultList.add(tempFiltered.get(0));
-                        if (tempFiltered.size() > 1) {
-                            resultList.add(tempFiltered.get(tempFiltered.size() - 1));
+
+                        if (firstAndLastOnly && !tempFiltered.isEmpty()) {
+                            resultList.add(tempFiltered.get(0));
+                            if (tempFiltered.size() > 1) {
+                                resultList.add(tempFiltered.get(tempFiltered.size() - 1));
+                            }
                         }
+
+                        conn.close();
+                        historyRecordsMap.put(historyName, resultList);
                     }
-                    conn.close();
                 }
             }
-
         } catch (Exception e) {
             Logger.Error("Error in GetAllHistory: " + e.getMessage());
             responseMap.put("error", e.getMessage());
@@ -183,10 +182,9 @@ public class HistoryDBHelper {
         }
 
         responseMap.put("filteredRecordCount", totalRecords);
-        responseMap.put("historyRecords", resultList);
         responseMap.put("totalDatabaseRecordCount", totalScanned);
-        responseMap.put("historySourcePath", historySource);
         responseMap.put("filterValues", filterValues);
+        responseMap.put("histories", historyRecordsMap);
         return responseMap;
     }
 
@@ -201,99 +199,133 @@ public class HistoryDBHelper {
     }
 
     public static Map<String, Object> GetAllHistoryFromDB(String StartTime, String EndTime, String limit, String offset, String historySource, String filterValues, boolean firstAndLastOnly) {
-        Map<String, Map<String, String>> data = new LinkedHashMap<>();
-        List<Map<String, String>> resultList = new ArrayList<>();
         Map<String, Object> responseMap = new HashMap<>();
-        int totalRecords = 0;
+        Map<String, List<Map<String, String>>> historyData = new LinkedHashMap<>();
+        int totalFiltered = 0;
         int totalScanned = 0;
-       // int lim = Integer.parseInt(limit);
-       // int off = Integer.parseInt(offset);
-        StringBuilder historyGrp = new StringBuilder();
+
         try {
             BHistoryService historyService = (BHistoryService) Sys.getService(BHistoryService.TYPE);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yy hh:mm:ss a");
-            LocalDateTime endDateTime = LocalDateTime.parse(EndTime, formatter);
-
             if (historyService == null) {
-                Logger.Error("History service not available");
                 responseMap.put("error", "History service not available");
                 return responseMap;
             }
 
-            BHistoryDatabase db = historyService.getDatabase();
-            String path = historySource;
-            BOrd ord = BOrd.make(path);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yy hh:mm:ss a");
+            LocalDateTime endDateTime = LocalDateTime.parse(EndTime, formatter);
 
-            BIHistory history = (BIHistory) ord.resolve().get();
-            Logger.Log("2  History resolved successfully");
-            BHistoryConfig config = history.getConfig();
-            db.setConfig(config);
-            BHistoryId historyId = config.getId();
-            db.getSystemTable(String.valueOf(historyId));
-            Logger.Log("3  History resolved successfully");
-            BIHistory[] tablesRecord = db.getHistories();
-
-            for (int i = 0; i < tablesRecord.length; i++) {
-                BIHistory hist = tablesRecord[i];
-                historyGrp.append(hist.getId().toString());
-                if (i < tablesRecord.length - 1) {
-                    historyGrp.append(", ");
+            String[] sourceNames = historySource.split(",");
+            for (String name : sourceNames) {
+                name = name.trim();
+                String path = getHistoryPathByName(name);
+                if (path == null) {
+                    Logger.Log("❌ History not found: " + name);
+                    continue;
                 }
 
-                // Check for the /NetCool/TestPoint01 table
-                if (hist.getId().toString().equals(extractPath(historySource))) {
-                    HistoryDatabaseConnection conn = historyService.getDatabase().getDbConnection(null);
-                    Cursor<BHistoryRecord> cursor = conn.scan(hist);
-                    List<Map<String, String>> tempFiltered = new ArrayList<>();
+                BOrd ord = BOrd.make("history:" + path);  // Ensure prefix `history:` is added
+                BIHistory history = (BIHistory) ord.resolve().get();
+                BHistoryConfig config = history.getConfig();
 
-                    while (cursor.next()) {
-                        try {
-                            totalScanned++;
-                            BHistoryRecord record = cursor.get();
-                            BAbsTime timeStamp = record.getTimestamp();
-                            String formattedTimeStampValue = Generic.formatTimeStamp(timeStamp);;
-                            LocalDateTime alarmDateTime = LocalDateTime.parse(formattedTimeStampValue, formatter);
-                            if ((alarmDateTime.isBefore(endDateTime) || alarmDateTime.equals(endDateTime))) {
-                                totalRecords++;
-                               // if (totalRecords > off && resultList.size() < lim){
-                                Map<String, String> recordMap = convertToSyncallMap(record, filterValues);
-                                if (firstAndLastOnly) {
-                                    tempFiltered.add(recordMap);
-                                } else {
-                                    // Uncomment below to apply limit/offset if needed
-                                    // if (totalRecords > off && resultList.size() < lim) {
-                                    resultList.add(recordMap);
-                                    // }
-                                }
-                              //  }
+                HistoryDatabaseConnection conn = historyService.getDatabase().getDbConnection(null);
+                Cursor<BHistoryRecord> cursor = conn.scan(history);
+                List<Map<String, String>> records = new ArrayList<>();
+                List<Map<String, String>> tempFiltered = new ArrayList<>();
 
+                while (cursor.next()) {
+                    try {
+                        totalScanned++;
+                        BHistoryRecord record = cursor.get();
+                        String formattedTimeStamp = Generic.formatTimeStamp(record.getTimestamp());
+                        LocalDateTime recordTime = LocalDateTime.parse(formattedTimeStamp, formatter);
+
+                        if ((recordTime.isBefore(endDateTime) || recordTime.equals(endDateTime))) {
+                            totalFiltered++;
+                            Map<String, String> recordMap = convertToSyncallMap(record, filterValues);
+                            if (firstAndLastOnly) {
+                                tempFiltered.add(recordMap);
+                            } else {
+                                records.add(recordMap);
                             }
-                        } catch (Exception e) {
-                            Logger.Error(e.getMessage());
                         }
+                    } catch (Exception e) {
+                        Logger.Error("Error reading record: " + e.getMessage());
                     }
-                    if (firstAndLastOnly && !tempFiltered.isEmpty()) {
-                        resultList.add(tempFiltered.get(0));
-                        if (tempFiltered.size() > 1) {
-                            resultList.add(tempFiltered.get(tempFiltered.size() - 1));
-                        }
-                    }
-                    conn.close();
-
                 }
+
+                if (firstAndLastOnly && !tempFiltered.isEmpty()) {
+                    records.add(tempFiltered.get(0));
+                    if (tempFiltered.size() > 1) {
+                        records.add(tempFiltered.get(tempFiltered.size() - 1));
+                    }
+                }
+
+                conn.close();
+                historyData.put(name, records);
             }
 
         } catch (Exception e) {
-            Logger.Error("Error in GetAllHistory: " + e.getMessage());
             responseMap.put("error", e.getMessage());
             return responseMap;
         }
 
-        responseMap.put("filteredRecordCount", totalRecords);
-        responseMap.put("historyRecords", resultList);
-        responseMap.put("totalDatabaseRecordCount", totalScanned);
-        responseMap.put("historySourcePath", historySource);
         responseMap.put("filterValues", filterValues);
+        responseMap.put("totalDatabaseRecordCount", totalScanned);
+        responseMap.put("filteredRecordCount", totalFiltered);
+        responseMap.put("histories", historyData);
         return responseMap;
+    }
+
+
+
+    public static String[] getAllHistoryCount() {
+        try {
+            BHistoryService historyService = (BHistoryService) Sys.getService(BHistoryService.TYPE);
+            if (historyService == null) {
+                Logger.Error("❌ BHistoryService not available.");
+                return new String[0];
+            }
+
+            BHistoryDatabase db = historyService.getDatabase();
+            if (db == null) {
+                Logger.Error("❌ BHistoryDatabase not available.");
+                return new String[0];
+            }
+
+            BIHistory[] histories = db.getHistories();
+            if (histories == null || histories.length == 0) {
+                Logger.Log("ℹ️ No histories found in the station.");
+                return new String[0];
+            }
+
+            String[] historyNames = new String[histories.length];
+
+            for (int i = 0; i < histories.length; i++) {
+                try {
+                    BHistoryConfig config = histories[i].getConfig();
+                    historyNames[i] = config.getId().toString(); // Store name in array
+                } catch (Exception e) {
+                    Logger.Log("⚠️ Error reading a history config: " + e.getMessage());
+                    historyNames[i] = "error";
+                }
+            }
+
+            return historyNames;
+
+        } catch (Exception e) {
+            Logger.Error("❌ Error fetching history names: " + e.getMessage());
+            return new String[0];
+        }
+    }
+
+    public static String getHistoryPathByName(String name) {
+        String[] allPaths = getAllHistoryCount(); // This returns paths like "/NetCool/..."
+
+        for (String path : allPaths) {
+            if (path != null && path.endsWith("/" + name)) {
+                return "history:"+path;
+            }
+        }
+        return null; // or throw an exception if preferred
     }
 }

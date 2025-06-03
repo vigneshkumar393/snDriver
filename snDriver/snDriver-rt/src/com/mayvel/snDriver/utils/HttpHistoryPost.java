@@ -6,6 +6,11 @@ package com.mayvel.snDriver.utils;
         import com.sun.net.httpserver.HttpServer;
         import com.tridium.json.JSONObject;
 
+        import javax.baja.history.BHistoryConfig;
+        import javax.baja.history.BHistoryService;
+        import javax.baja.history.BIHistory;
+        import javax.baja.history.db.BHistoryDatabase;
+        import javax.baja.sys.Sys;
         import java.io.ByteArrayOutputStream;
         import java.io.IOException;
         import java.io.InputStream;
@@ -61,7 +66,7 @@ public class HttpHistoryPost {
 
             String StarTime = jsonBody.optString("startTime","");
             String EndTime = jsonBody.optString("endTime","");
-            String historySourcePath = jsonBody.optString("historySourcePath","");
+            String historySourcePath = jsonBody.optString("historySource","");
 
             Map<String, Object> responseMap;
             if(StarTime==""){

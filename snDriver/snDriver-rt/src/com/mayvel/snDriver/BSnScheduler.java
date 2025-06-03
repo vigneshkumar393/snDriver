@@ -1,6 +1,8 @@
 package com.mayvel.snDriver;
 
 import com.mayvel.snDriver.utils.Logger;
+import com.tridium.json.JSONArray;
+import com.tridium.json.JSONException;
 import com.tridium.json.JSONObject;
 
 import javax.baja.naming.BOrd;
@@ -400,121 +402,125 @@ public class BSnScheduler extends BComponent {
   public void scheduleCreateBasedOnJson() {
     new Thread(() -> {
       try {
-        String scheduleJson = getScheduleObject();  // Assuming this returns your schedule JSON string
 
-        String[] paths = getMatchingSchedulePaths(scheduleJson);
-        setScheduleOut("PATHS: " + Arrays.toString(paths));
-        String startTimeVal = getFromDate(scheduleJson);
-        String toTimeVal = getToDate(scheduleJson);
-
-        for (String path:paths) {
-          BOrd ord = BOrd.make(path);
-          BObject obj = ord.resolve().get();
-
-          if (!(obj instanceof BBooleanSchedule)) {
-            setScheduleOut("❌ Target is not a BBooleanSchedule: " + path);
-            return;
+        JSONArray jsonArray = convertStringToJsonArray(getScheduleObject());
+        for (int a = 0; a < jsonArray.length(); a++) {
+          JSONObject jsonObject = jsonArray.getJSONObject(a);
+          String[] paths = getMatchingSchedulePaths(jsonObject);
+          if(paths.length==0){
+            continue;
           }
+          String startTimeVal = getFromDate(jsonObject);
+          String toTimeVal = getToDate(jsonObject);
 
-          BBooleanSchedule schedule = (BBooleanSchedule) obj;
+          for (String path:paths) {
+            BOrd ord = BOrd.make(path);
+            BObject obj = ord.resolve().get();
 
-          // Parse the input start and end times
-          //SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh:mm:ss a", Locale.ENGLISH);
-          SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-          Date startDate = sdf.parse(startTimeVal);
-          Date endDate = sdf.parse(toTimeVal);
-
-          Calendar startCal = Calendar.getInstance();
-          startCal.setTime(startDate);
-
-          Calendar endCal = Calendar.getInstance();
-          endCal.setTime(endDate);
-
-          // Create BTime for start and end times
-          BTime startTime = BTime.make(
-                  startCal.get(Calendar.HOUR_OF_DAY),
-                  startCal.get(Calendar.MINUTE),
-                  startCal.get(Calendar.SECOND)
-          );
-
-          BTime endTime = BTime.make(
-                  endCal.get(Calendar.HOUR_OF_DAY),
-                  endCal.get(Calendar.MINUTE),
-                  endCal.get(Calendar.SECOND)
-          );
-
-          // Get day of the week (1 = Sunday, 2 = Monday, ..., 7 = Saturday)
-          int dayOfWeek = startCal.get(Calendar.DAY_OF_WEEK);
-          BWeekday bWeekday = null;
-
-          switch (dayOfWeek) {
-            case Calendar.SUNDAY:
-              bWeekday = BWeekday.sunday;
-              break;
-            case Calendar.MONDAY:
-              bWeekday = BWeekday.monday;
-              break;
-            case Calendar.TUESDAY:
-              bWeekday = BWeekday.tuesday;
-              break;
-            case Calendar.WEDNESDAY:
-              bWeekday = BWeekday.wednesday;
-              break;
-            case Calendar.THURSDAY:
-              bWeekday = BWeekday.thursday;
-              break;
-            case Calendar.FRIDAY:
-              bWeekday = BWeekday.friday;
-              break;
-            case Calendar.SATURDAY:
-              bWeekday = BWeekday.saturday;
-              break;
-          }
-
-          if (bWeekday == null) {
-            setScheduleOut("❌ Could not determine day of week.");
-            return;
-          }
-
-          // Create status value
-          BStatusBoolean statusValue = new BStatusBoolean(getScheduleValueToSet(), BStatus.ok);
-
-          // Add time range to correct weekday
-          BDaySchedule daySchedule = schedule.get(bWeekday);
-
-          // Get the schedules sorted in order
-          BTimeSchedule[] schedules = daySchedule.getTimesInOrder();
-
-          for (int i = 0; i < schedules.length; i++) {
-            BTimeSchedule bTimeSchedule = schedules[i];
-
-            // Get the start and end times of the current schedule
-            BTime stTime = bTimeSchedule.getStart();
-            BTime edTime = bTimeSchedule.getFinish();
-
-            // Compare the start and end times with the input values
-            if (stTime.equals(startTime) && edTime.equals(endTime)) {
-              // Remove the schedule if it matches the given time range
-              daySchedule.remove(bTimeSchedule);
-              break; // Exit the loop after the schedule is removed
+            if (!(obj instanceof BBooleanSchedule)) {
+              setScheduleOut("❌ Target is not a BBooleanSchedule: " + path);
+              return;
             }
+
+            BBooleanSchedule schedule = (BBooleanSchedule) obj;
+
+            // Parse the input start and end times
+            //SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh:mm:ss a", Locale.ENGLISH);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            Date startDate = sdf.parse(startTimeVal);
+            Date endDate = sdf.parse(toTimeVal);
+
+            Calendar startCal = Calendar.getInstance();
+            startCal.setTime(startDate);
+
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTime(endDate);
+
+            // Create BTime for start and end times
+            BTime startTime = BTime.make(
+                    startCal.get(Calendar.HOUR_OF_DAY),
+                    startCal.get(Calendar.MINUTE),
+                    startCal.get(Calendar.SECOND)
+            );
+
+            BTime endTime = BTime.make(
+                    endCal.get(Calendar.HOUR_OF_DAY),
+                    endCal.get(Calendar.MINUTE),
+                    endCal.get(Calendar.SECOND)
+            );
+
+            // Get day of the week (1 = Sunday, 2 = Monday, ..., 7 = Saturday)
+            int dayOfWeek = startCal.get(Calendar.DAY_OF_WEEK);
+            BWeekday bWeekday = null;
+
+            switch (dayOfWeek) {
+              case Calendar.SUNDAY:
+                bWeekday = BWeekday.sunday;
+                break;
+              case Calendar.MONDAY:
+                bWeekday = BWeekday.monday;
+                break;
+              case Calendar.TUESDAY:
+                bWeekday = BWeekday.tuesday;
+                break;
+              case Calendar.WEDNESDAY:
+                bWeekday = BWeekday.wednesday;
+                break;
+              case Calendar.THURSDAY:
+                bWeekday = BWeekday.thursday;
+                break;
+              case Calendar.FRIDAY:
+                bWeekday = BWeekday.friday;
+                break;
+              case Calendar.SATURDAY:
+                bWeekday = BWeekday.saturday;
+                break;
+            }
+
+            if (bWeekday == null) {
+              setScheduleOut("❌ Could not determine day of week.");
+              return;
+            }
+
+            // Create status value
+            BStatusBoolean statusValue = new BStatusBoolean(getScheduleValueToSet(), BStatus.ok);
+
+            // Add time range to correct weekday
+            BDaySchedule daySchedule = schedule.get(bWeekday);
+
+            // Get the schedules sorted in order
+            BTimeSchedule[] schedules = daySchedule.getTimesInOrder();
+
+            for (int i = 0; i < schedules.length; i++) {
+              BTimeSchedule bTimeSchedule = schedules[i];
+
+              // Get the start and end times of the current schedule
+              BTime stTime = bTimeSchedule.getStart();
+              BTime edTime = bTimeSchedule.getFinish();
+
+              // Compare the start and end times with the input values
+              if (stTime.equals(startTime) && edTime.equals(endTime)) {
+                // Remove the schedule if it matches the given time range
+                daySchedule.remove(bTimeSchedule);
+                break; // Exit the loop after the schedule is removed
+              }
+            }
+
+            daySchedule.add(startTime, endTime, statusValue);
+
+            String scheduleResultJson = String.format(
+                    "{ \"fromTime\": \"%s\", \"toTime\": \"%s\", \"status\": \"%s\", \"id\": \"%s\" }",
+                    startTimeVal,
+                    toTimeVal,
+                    "Success",
+                    getId(jsonObject) // or any unique ID you want to use
+            );
+            setScheduleOut(scheduleResultJson);
+
+            Logger.Log("✅ Scheduled on " + bWeekday + " from " + startTime + " to " + endTime);
           }
-
-          daySchedule.add(startTime, endTime, statusValue);
-
-          String scheduleResultJson = String.format(
-                  "{ \"fromTime\": \"%s\", \"toTime\": \"%s\", \"status\": \"%s\", \"id\": \"%s\" }",
-                  startTimeVal,
-                  toTimeVal,
-                  "Success",
-                  getId(getScheduleObject()) // or any unique ID you want to use
-          );
-          setScheduleOut(scheduleResultJson);
-
-          Logger.Log("✅ Scheduled on " + bWeekday + " from " + startTime + " to " + endTime);
         }
-
       } catch (Exception e) {
         setScheduleOut("❌ Failed to create schedule: " + e.getMessage());
         Logger.Log("❌ Failed to create schedule: " + e.getMessage());
@@ -528,15 +534,12 @@ public class BSnScheduler extends BComponent {
     super.stopped();
   }
 
-  public String[] getMatchingSchedulePaths(String scheduleObjectJson) {
+  public String[] getMatchingSchedulePaths(JSONObject scheduleObjectJson) {
     List<String> matchedPaths = new ArrayList<>();
 
     try {
-      // Parse JSON
-      JSONObject obj = new JSONObject(scheduleObjectJson);
-
       // Get niagara_tag string and split into individual tags
-      String niagaraTagStr = obj.optString("niagara_tag", "");
+      String niagaraTagStr = scheduleObjectJson.optString("niagara_tag", "");
       if (niagaraTagStr.isEmpty()) {
         Logger.Log("⚠️ No niagara_tag provided.");
         setScheduleOut("⚠️ No niagara_tag provided.");
@@ -578,9 +581,9 @@ public class BSnScheduler extends BComponent {
     return matchedPaths.toArray(new String[0]);
   }
 
-  public String getFromDate(String scheduleObjectJson) {
+  public String getFromDate(JSONObject obj) {
     try {
-      JSONObject obj = new JSONObject(scheduleObjectJson);      return obj.optString("booking_from", "");
+      return obj.optString("booking_from", "");
     } catch (Exception e) {
       setScheduleOut("❌ Error parsing booking_from");
 
@@ -589,9 +592,9 @@ public class BSnScheduler extends BComponent {
     }
   }
 
-  public String getToDate(String scheduleObjectJson) {
+  public String getToDate(JSONObject obj) {
     try {
-      JSONObject obj = new JSONObject(scheduleObjectJson);      return obj.optString("booking_to", "");
+      return obj.optString("booking_to", "");
     } catch (Exception e) {
       setScheduleOut("❌ Error parsing booking_to");
       e.printStackTrace();
@@ -600,9 +603,8 @@ public class BSnScheduler extends BComponent {
   }
 
 
-  public String getId(String scheduleObjectJson) {
+  public String getId(JSONObject obj) {
     try {
-      JSONObject obj = new JSONObject(scheduleObjectJson);
       return obj.optString("sys_id", "");
     } catch (Exception e) {
       setScheduleOut("❌ Error parsing sys_id");
@@ -638,5 +640,15 @@ public class BSnScheduler extends BComponent {
 
     return allPaths.toArray(new String[0]);
   }
+
+  public JSONArray convertStringToJsonArray(String jsonString) {
+    try {
+      return new JSONArray(jsonString);
+    } catch (Exception e) {
+      Logger.Log("❌ Failed to parse JSON Array: " + e.getMessage());
+      return new JSONArray(); // safe fallback
+    }
+  }
+
 
 }
