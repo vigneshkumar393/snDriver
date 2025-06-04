@@ -52,7 +52,7 @@ import java.util.*;
         flags = Flags.READONLY | Flags.SUMMARY
 )
 @NiagaraProperty(
-        name = "scheduleObject",
+        name = "scheduleArray",
         type = "String",
         defaultValue = "",
         flags = Flags.SUMMARY
@@ -63,8 +63,8 @@ import java.util.*;
 public class BSnScheduler extends BComponent {
 //region /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 //@formatter:off
-/*@ $com.mayvel.snDriver.BSnScheduler(3237465027)1.0$ @*/
-/* Generated Mon Jun 02 15:12:20 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
+/*@ $com.mayvel.snDriver.BSnScheduler(986045235)1.0$ @*/
+/* Generated Wed Jun 04 12:03:36 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
 
   //region Property "schedulePath"
 
@@ -184,28 +184,28 @@ public class BSnScheduler extends BComponent {
 
   //endregion Property "scheduleOut"
 
-  //region Property "scheduleObject"
+  //region Property "scheduleArray"
 
   /**
-   * Slot for the {@code scheduleObject} property.
-   * @see #getScheduleObject
-   * @see #setScheduleObject
+   * Slot for the {@code scheduleArray} property.
+   * @see #getScheduleArray
+   * @see #setScheduleArray
    */
-  public static final Property scheduleObject = newProperty(Flags.SUMMARY, "", null);
+  public static final Property scheduleArray = newProperty(Flags.SUMMARY, "", null);
 
   /**
-   * Get the {@code scheduleObject} property.
-   * @see #scheduleObject
+   * Get the {@code scheduleArray} property.
+   * @see #scheduleArray
    */
-  public String getScheduleObject() { return getString(scheduleObject); }
+  public String getScheduleArray() { return getString(scheduleArray); }
 
   /**
-   * Set the {@code scheduleObject} property.
-   * @see #scheduleObject
+   * Set the {@code scheduleArray} property.
+   * @see #scheduleArray
    */
-  public void setScheduleObject(String v) { setString(scheduleObject, v, null); }
+  public void setScheduleArray(String v) { setString(scheduleArray, v, null); }
 
-  //endregion Property "scheduleObject"
+  //endregion Property "scheduleArray"
 
   //region Action "scheduleClearAll"
 
@@ -277,7 +277,7 @@ public class BSnScheduler extends BComponent {
   }
 
   public void doScheduleCreate() {
-    if(getScheduleObject().isEmpty()){
+    if(getScheduleArray().isEmpty()){
       scheduleCreateBasedOnInput();
     }else{
       scheduleCreateBasedOnJson();
@@ -403,7 +403,7 @@ public class BSnScheduler extends BComponent {
     new Thread(() -> {
       try {
 
-        JSONArray jsonArray = convertStringToJsonArray(getScheduleObject());
+        JSONArray jsonArray = convertStringToJsonArray(getScheduleArray());
         for (int a = 0; a < jsonArray.length(); a++) {
           JSONObject jsonObject = jsonArray.getJSONObject(a);
           String[] paths = getMatchingSchedulePaths(jsonObject);
