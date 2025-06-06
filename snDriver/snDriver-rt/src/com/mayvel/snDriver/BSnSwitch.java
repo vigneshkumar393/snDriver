@@ -1,5 +1,8 @@
 package com.mayvel.snDriver;
 
+import com.mayvel.snDriver.utils.CustomLicenseGenerator;
+
+import javax.baja.naming.BOrd;
 import javax.baja.nre.annotations.Facet;
 import javax.baja.nre.annotations.NiagaraAction;
 import javax.baja.nre.annotations.NiagaraProperty;
@@ -215,7 +218,7 @@ public class BSnSwitch extends BComponent {
 //endregion /*+ ------------ END BAJA AUTO GENERATED CODE -------------- +*/
 public void doTrigger() {
   counter++;
-  setConditionOut("Triggered " + counter + " times.");
+  setConditionOut("Triggered " + CustomLicenseGenerator.validateLicense());
 }
 
   public void doReset() {

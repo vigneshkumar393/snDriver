@@ -8,6 +8,7 @@
       <p m="dtl=snDriver" t="dtl:SnAlarm" n="SnAlarm" />
       <p m="dtl=snDriver" t="dtl:SnHistory" n="SnHistory" />
       <p m="dtl=snDriver" t="dtl:SnScheduler" n="SnScheduler" />
+      <p m="dtl=snDriver" t="dtl:SnDriverNetwork" n="SnDriverNetwork" />
     </p>
   </p>
 
