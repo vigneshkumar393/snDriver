@@ -22,18 +22,7 @@ import javax.baja.sys.*;
         defaultValue = "",
         flags = Flags.SUMMARY
 )
-@NiagaraProperty(
-        name = "scheduleStartTime",
-        type = "String",
-        defaultValue = "",
-        flags = Flags.SUMMARY
-)
-@NiagaraProperty(
-        name = "scheduleEndTime",
-        type = "String",
-        defaultValue = "",
-        flags = Flags.SUMMARY
-)
+
 @NiagaraProperty(
         name = "conditionOut",
         type = "String",
@@ -51,13 +40,11 @@ import javax.baja.sys.*;
         name = "reset")
 public class BSnSwitch extends BComponent {
   public int counter=0;
-  private String prevStartTime = "";
-  private String prevEndTime = "";
 
 //region /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 //@formatter:off
-/*@ $com.mayvel.snDriver.BSnSwitch(1533659545)1.0$ @*/
-/* Generated Fri May 30 13:14:31 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
+/*@ $com.mayvel.snDriver.BSnSwitch(2524864881)1.0$ @*/
+/* Generated Fri Jun 06 12:40:39 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
 
   //region Property "stringValue"
 
@@ -104,52 +91,6 @@ public class BSnSwitch extends BComponent {
   public void setMatchValue(String v) { setString(matchValue, v, null); }
 
   //endregion Property "matchValue"
-
-  //region Property "scheduleStartTime"
-
-  /**
-   * Slot for the {@code scheduleStartTime} property.
-   * @see #getScheduleStartTime
-   * @see #setScheduleStartTime
-   */
-  public static final Property scheduleStartTime = newProperty(Flags.SUMMARY, "", null);
-
-  /**
-   * Get the {@code scheduleStartTime} property.
-   * @see #scheduleStartTime
-   */
-  public String getScheduleStartTime() { return getString(scheduleStartTime); }
-
-  /**
-   * Set the {@code scheduleStartTime} property.
-   * @see #scheduleStartTime
-   */
-  public void setScheduleStartTime(String v) { setString(scheduleStartTime, v, null); }
-
-  //endregion Property "scheduleStartTime"
-
-  //region Property "scheduleEndTime"
-
-  /**
-   * Slot for the {@code scheduleEndTime} property.
-   * @see #getScheduleEndTime
-   * @see #setScheduleEndTime
-   */
-  public static final Property scheduleEndTime = newProperty(Flags.SUMMARY, "", null);
-
-  /**
-   * Get the {@code scheduleEndTime} property.
-   * @see #scheduleEndTime
-   */
-  public String getScheduleEndTime() { return getString(scheduleEndTime); }
-
-  /**
-   * Set the {@code scheduleEndTime} property.
-   * @see #scheduleEndTime
-   */
-  public void setScheduleEndTime(String v) { setString(scheduleEndTime, v, null); }
-
-  //endregion Property "scheduleEndTime"
 
   //region Property "conditionOut"
 
@@ -218,13 +159,11 @@ public class BSnSwitch extends BComponent {
 //endregion /*+ ------------ END BAJA AUTO GENERATED CODE -------------- +*/
 public void doTrigger() {
   counter++;
-  setConditionOut("Triggered " + CustomLicenseGenerator.validateLicense());
+  setConditionOut("Triggered " +counter + " times.");
 }
 
   public void doReset() {
     counter = 0;
-    prevEndTime="";
-    prevStartTime="";
     setStringValue("");
     setConditionOut("");
   }
@@ -242,9 +181,7 @@ public void doTrigger() {
   public void changed(Property property, Context context) {
     super.changed(property, context);
     if (property.equals(stringValue)
-            || property.equals(matchValue)
-            || property.equals(scheduleStartTime)
-            || property.equals(scheduleEndTime)) {
+            || property.equals(matchValue)) {
       checkAndTriggerMatch();
     }
   }
@@ -253,23 +190,13 @@ public void doTrigger() {
   private void checkAndTriggerMatch() {
     String stValue = getStringValue();
     String mtValue = getMatchValue();
-    String startTime = getScheduleStartTime();
-    String endTime = getScheduleEndTime();
 
     if (stValue != null && !stValue.isEmpty()
             && mtValue != null && !mtValue.isEmpty()
-            && stValue.equals(mtValue)
-            && startTime != null && !startTime.isEmpty()
-            && endTime != null && !endTime.isEmpty()) {
+            && stValue.equals(mtValue) ) {
 
       // Check if start or end time has changed
-      if (!startTime.equals(prevStartTime) || !endTime.equals(prevEndTime)) {
         invoke(trigger, null, null);
-
-        // Update local cached values
-        prevStartTime = startTime;
-        prevEndTime = endTime;
-      }
     }
   }
 }

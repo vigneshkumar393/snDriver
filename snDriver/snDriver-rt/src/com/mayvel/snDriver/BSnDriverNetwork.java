@@ -74,8 +74,8 @@ public class BSnDriverNetwork
 
 //region /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 //@formatter:off
-/*@ $com.mayvel.snDriver.BSnDriverNetwork(563991555)1.0$ @*/
-/* Generated Thu Jun 05 17:52:53 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
+/*@ $com.mayvel.snDriver.BSnDriverNetwork(4077497335)1.0$ @*/
+/* Generated Fri Jun 06 12:40:39 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
 
   //region Property "pollScheduler"
 
@@ -84,7 +84,7 @@ public class BSnDriverNetwork
    * @see #getPollScheduler
    * @see #setPollScheduler
    */
-  public static final Property pollScheduler = newProperty(0, new BNPollScheduler(), null);
+  public static final Property pollScheduler = newProperty(Flags.HIDDEN, new BNPollScheduler(), null);
 
   /**
    * Get the {@code pollScheduler} property.

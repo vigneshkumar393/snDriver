@@ -52,6 +52,12 @@ import java.util.*;
         flags = Flags.READONLY | Flags.SUMMARY
 )
 @NiagaraProperty(
+        name = "scheduleIdsOut",
+        type = "String",
+        defaultValue = "",
+        flags = Flags.READONLY | Flags.SUMMARY
+)
+@NiagaraProperty(
         name = "scheduleArray",
         type = "String",
         defaultValue = "",
@@ -63,8 +69,8 @@ import java.util.*;
 public class BSnScheduler extends BComponent {
 //region /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 //@formatter:off
-/*@ $com.mayvel.snDriver.BSnScheduler(986045235)1.0$ @*/
-/* Generated Wed Jun 04 12:03:36 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
+/*@ $com.mayvel.snDriver.BSnScheduler(1238260237)1.0$ @*/
+/* Generated Fri Jun 06 15:35:51 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
 
   //region Property "schedulePath"
 
@@ -184,6 +190,29 @@ public class BSnScheduler extends BComponent {
 
   //endregion Property "scheduleOut"
 
+  //region Property "scheduleIdsOut"
+
+  /**
+   * Slot for the {@code scheduleIdsOut} property.
+   * @see #getScheduleIdsOut
+   * @see #setScheduleIdsOut
+   */
+  public static final Property scheduleIdsOut = newProperty(Flags.READONLY | Flags.SUMMARY, "", null);
+
+  /**
+   * Get the {@code scheduleIdsOut} property.
+   * @see #scheduleIdsOut
+   */
+  public String getScheduleIdsOut() { return getString(scheduleIdsOut); }
+
+  /**
+   * Set the {@code scheduleIdsOut} property.
+   * @see #scheduleIdsOut
+   */
+  public void setScheduleIdsOut(String v) { setString(scheduleIdsOut, v, null); }
+
+  //endregion Property "scheduleIdsOut"
+
   //region Property "scheduleArray"
 
   /**
@@ -253,6 +282,7 @@ public class BSnScheduler extends BComponent {
   // Schdule methods
   public void doScheduleClearAll() {
     Logger.Log("BSNGroup schedule action triggered");
+    setScheduleIdsOut("");
     String[] paths = getAllBooleanSchedulePaths();
     for (String path:
          paths) {
@@ -404,6 +434,8 @@ public class BSnScheduler extends BComponent {
       try {
 
         JSONArray jsonArray = convertStringToJsonArray(getScheduleArray());
+        Set<String> scheduledIds = new HashSet<>();
+        setScheduleIdsOut("");
         for (int a = 0; a < jsonArray.length(); a++) {
           JSONObject jsonObject = jsonArray.getJSONObject(a);
           String[] paths = getMatchingSchedulePaths(jsonObject);
@@ -508,7 +540,8 @@ public class BSnScheduler extends BComponent {
             }
 
             daySchedule.add(startTime, endTime, statusValue);
-
+            String id = getId(jsonObject); // Extract ID
+            scheduledIds.add(id); // Step 2: Add to list
             String scheduleResultJson = String.format(
                     "{ \"fromTime\": \"%s\", \"toTime\": \"%s\", \"status\": \"%s\", \"id\": \"%s\" }",
                     startTimeVal,
@@ -521,7 +554,14 @@ public class BSnScheduler extends BComponent {
             Logger.Log("✅ Scheduled on " + bWeekday + " from " + startTime + " to " + endTime);
           }
         }
+        scheduledIds.add("");
+        // Step 3: Convert List to Array
+        String[] scheduledIdArray = scheduledIds.toArray(new String[0]);
+        // Optionally log or use this array somewhere
+        Logger.Log("📋 All Scheduled IDs: " + Arrays.toString(scheduledIdArray));
+        setScheduleIdsOut(Arrays.toString(scheduledIdArray));
       } catch (Exception e) {
+        setScheduleIdsOut("");
         setScheduleOut("❌ Failed to create schedule: " + e.getMessage());
         Logger.Log("❌ Failed to create schedule: " + e.getMessage());
         e.printStackTrace();
@@ -583,7 +623,7 @@ public class BSnScheduler extends BComponent {
 
   public String getFromDate(JSONObject obj) {
     try {
-      return obj.optString("booking_from", "");
+      return obj.optString("from", "");
     } catch (Exception e) {
       setScheduleOut("❌ Error parsing booking_from");
 
@@ -594,7 +634,7 @@ public class BSnScheduler extends BComponent {
 
   public String getToDate(JSONObject obj) {
     try {
-      return obj.optString("booking_to", "");
+      return obj.optString("to", "");
     } catch (Exception e) {
       setScheduleOut("❌ Error parsing booking_to");
       e.printStackTrace();
