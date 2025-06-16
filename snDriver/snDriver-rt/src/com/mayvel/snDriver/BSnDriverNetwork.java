@@ -4,24 +4,17 @@
 
 package com.mayvel.snDriver;
 
+import javax.baja.naming.BOrd;
 import javax.baja.nre.annotations.NiagaraAction;
 import javax.baja.nre.annotations.NiagaraProperty;
 import javax.baja.nre.annotations.NiagaraType;
-import javax.baja.sys.Context;
-import javax.baja.sys.Flags;
-import javax.baja.sys.Property;
-import javax.baja.sys.Sys;
-import javax.baja.sys.Type;
+import javax.baja.sys.*;
 import javax.baja.util.Lexicon;
 
 import com.mayvel.snDriver.utils.CustomLicenseGenerator;
 import com.tridium.json.JSONObject;
 import com.tridium.ndriver.BNNetwork;
-import com.tridium.ndriver.comm.*;
-import com.tridium.ndriver.datatypes.*;
-import com.tridium.ndriver.discover.*;
 import com.tridium.ndriver.poll.*;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -62,10 +55,46 @@ import java.util.TimerTask;
         flags = Flags.SUMMARY| Flags.READONLY
 )
 @NiagaraProperty(
+        name = "planName",
+        type = "String",
+        defaultValue = "",
+        flags = Flags.SUMMARY| Flags.READONLY
+)
+@NiagaraProperty(
+        name = "SnHttpClientLimit",
+        type = "String",
+        defaultValue = "",
+        flags = Flags.SUMMARY| Flags.READONLY
+)
+@NiagaraProperty(
+        name = "SnSchedulerLimit",
+        type = "String",
+        defaultValue = "",
+        flags = Flags.SUMMARY| Flags.READONLY
+)
+@NiagaraProperty(
+        name = "SnAlarmLimit",
+        type = "String",
+        defaultValue = "",
+        flags = Flags.SUMMARY| Flags.READONLY
+)
+@NiagaraProperty(
+        name = "SnHistoryLimit",
+        type = "String",
+        defaultValue = "",
+        flags = Flags.SUMMARY| Flags.READONLY
+)
+@NiagaraProperty(
         name = "out",
         type = "String",
         defaultValue = "",
         flags = Flags.READONLY | Flags.SUMMARY
+)
+@NiagaraProperty(
+        name = "totalTriggerCount",
+        type = "int",
+        defaultValue = "BInteger.make(0)",
+        flags = Flags.SUMMARY | Flags.READONLY
 )
 public class BSnDriverNetwork
   extends BNNetwork
@@ -74,8 +103,8 @@ public class BSnDriverNetwork
 
 //region /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 //@formatter:off
-/*@ $com.mayvel.snDriver.BSnDriverNetwork(4077497335)1.0$ @*/
-/* Generated Fri Jun 06 12:40:39 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
+/*@ $com.mayvel.snDriver.BSnDriverNetwork(563037370)1.0$ @*/
+/* Generated Fri Jun 13 10:01:03 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
 
   //region Property "pollScheduler"
 
@@ -192,6 +221,121 @@ public class BSnDriverNetwork
 
   //endregion Property "validThru"
 
+  //region Property "planName"
+
+  /**
+   * Slot for the {@code planName} property.
+   * @see #getPlanName
+   * @see #setPlanName
+   */
+  public static final Property planName = newProperty(Flags.SUMMARY | Flags.READONLY, "", null);
+
+  /**
+   * Get the {@code planName} property.
+   * @see #planName
+   */
+  public String getPlanName() { return getString(planName); }
+
+  /**
+   * Set the {@code planName} property.
+   * @see #planName
+   */
+  public void setPlanName(String v) { setString(planName, v, null); }
+
+  //endregion Property "planName"
+
+  //region Property "SnHttpClientLimit"
+
+  /**
+   * Slot for the {@code SnHttpClientLimit} property.
+   * @see #getSnHttpClientLimit
+   * @see #setSnHttpClientLimit
+   */
+  public static final Property SnHttpClientLimit = newProperty(Flags.SUMMARY | Flags.READONLY, "", null);
+
+  /**
+   * Get the {@code SnHttpClientLimit} property.
+   * @see #SnHttpClientLimit
+   */
+  public String getSnHttpClientLimit() { return getString(SnHttpClientLimit); }
+
+  /**
+   * Set the {@code SnHttpClientLimit} property.
+   * @see #SnHttpClientLimit
+   */
+  public void setSnHttpClientLimit(String v) { setString(SnHttpClientLimit, v, null); }
+
+  //endregion Property "SnHttpClientLimit"
+
+  //region Property "SnSchedulerLimit"
+
+  /**
+   * Slot for the {@code SnSchedulerLimit} property.
+   * @see #getSnSchedulerLimit
+   * @see #setSnSchedulerLimit
+   */
+  public static final Property SnSchedulerLimit = newProperty(Flags.SUMMARY | Flags.READONLY, "", null);
+
+  /**
+   * Get the {@code SnSchedulerLimit} property.
+   * @see #SnSchedulerLimit
+   */
+  public String getSnSchedulerLimit() { return getString(SnSchedulerLimit); }
+
+  /**
+   * Set the {@code SnSchedulerLimit} property.
+   * @see #SnSchedulerLimit
+   */
+  public void setSnSchedulerLimit(String v) { setString(SnSchedulerLimit, v, null); }
+
+  //endregion Property "SnSchedulerLimit"
+
+  //region Property "SnAlarmLimit"
+
+  /**
+   * Slot for the {@code SnAlarmLimit} property.
+   * @see #getSnAlarmLimit
+   * @see #setSnAlarmLimit
+   */
+  public static final Property SnAlarmLimit = newProperty(Flags.SUMMARY | Flags.READONLY, "", null);
+
+  /**
+   * Get the {@code SnAlarmLimit} property.
+   * @see #SnAlarmLimit
+   */
+  public String getSnAlarmLimit() { return getString(SnAlarmLimit); }
+
+  /**
+   * Set the {@code SnAlarmLimit} property.
+   * @see #SnAlarmLimit
+   */
+  public void setSnAlarmLimit(String v) { setString(SnAlarmLimit, v, null); }
+
+  //endregion Property "SnAlarmLimit"
+
+  //region Property "SnHistoryLimit"
+
+  /**
+   * Slot for the {@code SnHistoryLimit} property.
+   * @see #getSnHistoryLimit
+   * @see #setSnHistoryLimit
+   */
+  public static final Property SnHistoryLimit = newProperty(Flags.SUMMARY | Flags.READONLY, "", null);
+
+  /**
+   * Get the {@code SnHistoryLimit} property.
+   * @see #SnHistoryLimit
+   */
+  public String getSnHistoryLimit() { return getString(SnHistoryLimit); }
+
+  /**
+   * Set the {@code SnHistoryLimit} property.
+   * @see #SnHistoryLimit
+   */
+  public void setSnHistoryLimit(String v) { setString(SnHistoryLimit, v, null); }
+
+  //endregion Property "SnHistoryLimit"
+
   //region Property "out"
 
   /**
@@ -214,6 +358,29 @@ public class BSnDriverNetwork
   public void setOut(String v) { setString(out, v, null); }
 
   //endregion Property "out"
+
+  //region Property "totalTriggerCount"
+
+  /**
+   * Slot for the {@code totalTriggerCount} property.
+   * @see #getTotalTriggerCount
+   * @see #setTotalTriggerCount
+   */
+  public static final Property totalTriggerCount = newProperty(Flags.SUMMARY | Flags.READONLY, BInteger.make(0), null);
+
+  /**
+   * Get the {@code totalTriggerCount} property.
+   * @see #totalTriggerCount
+   */
+  public int getTotalTriggerCount() { return getInt(totalTriggerCount); }
+
+  /**
+   * Set the {@code totalTriggerCount} property.
+   * @see #totalTriggerCount
+   */
+  public void setTotalTriggerCount(int v) { setInt(totalTriggerCount, v, null); }
+
+  //endregion Property "totalTriggerCount"
 
   //region Type
 
@@ -275,34 +442,67 @@ public class BSnDriverNetwork
   }
 
   private void validateLicenseKey() {
+    String jsonString = CustomLicenseGenerator.validateLicense();
 
-      String jsonString = CustomLicenseGenerator.validateLicense();
-      try {
-        JSONObject json = new JSONObject(jsonString);
-        boolean isValid = json.optBoolean("result", false);
-        String validFrom = json.optString("validFrom", "");
-        String validThru = json.optString("validThru", "");
-        if (isValid) {
+    try {
+      JSONObject json = new JSONObject(jsonString);
+      boolean isValid = json.optBoolean("result", false);
+      String validFrom = json.optString("validFrom", "");
+      String validThru = json.optString("validThru", "");
+      String planName = json.optString("planName", "");
 
-          String message = json.optString("message", "License is valid.");
+      // Correctly handle numeric values (convert int to string)
+      String SnHttpClient = String.valueOf(json.optInt("SnHttpClient", 0));
+      String SnScheduler = String.valueOf(json.optInt("SnScheduler", 0));
+      String SnAlarm = String.valueOf(json.optInt("SnAlarm", 0));
+      String SnHistory = String.valueOf(json.optInt("SnHistory", 0));
 
-          setValidFrom(validFrom);
-          setValidThru(validThru);
-          setLicenseValid(true);
-          setOut(message);
-        } else {
-          setValidFrom(validFrom);
-          setValidThru(validThru);
-          setLicenseValid(false);
-          setOut("Invalid License: " + json.optString("message", "Unknown error"));
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
-        setValidFrom("");
-        setValidThru("");
+      int apiTriggeredCount = CustomLicenseGenerator.getHttpRequestCount();
+      int scheduledCount = CustomLicenseGenerator.getAllScheduledCount();
+      int historyApiRequestCount = CustomLicenseGenerator.getAllHistoryApiRequestCount();
+      int alarmRequestCount = CustomLicenseGenerator.getAlarmReceivedCount();
+
+      // Set values
+      setValidFrom(validFrom);
+      setValidThru(validThru);
+      setPlanName(planName);
+
+      setSnHttpClientLimit(apiTriggeredCount+"/"+SnHttpClient);
+      setSnSchedulerLimit(scheduledCount+"/"+SnScheduler);
+      setSnAlarmLimit(alarmRequestCount+"/"+SnAlarm);
+      setSnHistoryLimit(historyApiRequestCount+"/"+SnHistory);
+
+      if (isValid) {
+        String message = json.optString("message", "License is valid.");
+        setLicenseValid(true);
+        setOut(message);
+      } else {
         setLicenseValid(false);
-        setOut("License check failed: " + e.getMessage());
+        setOut("Invalid License: " + json.optString("message", "Unknown error"));
+
+        // Reset values on invalid license
+        setPlanName("");
+        setSnHttpClientLimit("0");
+        setSnSchedulerLimit("0");
+        setSnAlarmLimit("0");
+        setSnHistoryLimit("0");
       }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      setValidFrom("");
+      setValidThru("");
+      setLicenseValid(false);
+      setOut("License check failed: " + e.getMessage());
+
+      // Reset all values on error
+      setPlanName("");
+      setSnHttpClientLimit("0");
+      setSnSchedulerLimit("0");
+      setSnAlarmLimit("0");
+      setSnHistoryLimit("0");
+    }
+    CustomLicenseGenerator.writeLSFile();
   }
 
 ////////////////////////////////////////////////////////////////
@@ -312,8 +512,6 @@ public class BSnDriverNetwork
   public String getLicenseKey() {
     return getLicense();
   }
-
-
 
   @Override
   public void started() throws Exception {
@@ -328,7 +526,7 @@ public class BSnDriverNetwork
           e.printStackTrace();
         }
       }
-    }, 0, 60 * 1000); // every 10 seconds
+    }, 0, 1000); // every 1 second
   }
 
   @Override

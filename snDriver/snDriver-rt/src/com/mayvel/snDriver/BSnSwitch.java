@@ -35,7 +35,8 @@ import javax.baja.sys.*;
 
 @NiagaraAction(
         name = "trigger")
-
+@NiagaraAction(
+        name = "testCall")
 @NiagaraAction(
         name = "reset")
 public class BSnSwitch extends BComponent {
@@ -43,8 +44,8 @@ public class BSnSwitch extends BComponent {
 
 //region /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 //@formatter:off
-/*@ $com.mayvel.snDriver.BSnSwitch(2524864881)1.0$ @*/
-/* Generated Fri Jun 06 12:40:39 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
+/*@ $com.mayvel.snDriver.BSnSwitch(1965594106)1.0$ @*/
+/* Generated Fri Jun 13 15:20:14 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
 
   //region Property "stringValue"
 
@@ -131,6 +132,22 @@ public class BSnSwitch extends BComponent {
 
   //endregion Action "trigger"
 
+  //region Action "testCall"
+
+  /**
+   * Slot for the {@code testCall} action.
+   * @see #testCall()
+   */
+  public static final Action testCall = newAction(0, null);
+
+  /**
+   * Invoke the {@code testCall} action.
+   * @see #testCall
+   */
+  public void testCall() { invoke(testCall, null, null); }
+
+  //endregion Action "testCall"
+
   //region Action "reset"
 
   /**
@@ -160,6 +177,15 @@ public class BSnSwitch extends BComponent {
 public void doTrigger() {
   counter++;
   setConditionOut("Triggered " +counter + " times.");
+}
+
+public void doTestCall(){
+  counter++;
+  if(CustomLicenseGenerator.isSnLimitValid("http")){
+    setConditionOut("Triggered " +"|| "+CustomLicenseGenerator.isSnLimitValid("http")+ " times.");
+  }else{
+    setConditionOut("http limit reached");
+  }
 }
 
   public void doReset() {
