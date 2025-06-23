@@ -166,8 +166,8 @@ public class CustomLicenseGenerator {
                     String planName = json.getString("planName");
                     int SnHttpClient = json.getInt("SnHttpClient");
                     int SnScheduler = json.getInt("SnScheduler");
-                    int SnAlarm = json.getInt("SnAlarm");
-                    int SnHistory = json.getInt("SnHistory");
+                    //int SnAlarm = json.getInt("SnAlarm");
+                    //int SnHistory = json.getInt("SnHistory");
                     JSONObject resultJson = new JSONObject();
 
                     resultJson.put("validFrom", validFrom);
@@ -175,8 +175,8 @@ public class CustomLicenseGenerator {
                     resultJson.put("planName", planName);
                     resultJson.put("SnHttpClient", SnHttpClient);
                     resultJson.put("SnScheduler", SnScheduler);
-                    resultJson.put("SnAlarm", SnAlarm);
-                    resultJson.put("SnHistory", SnHistory);
+                    //resultJson.put("SnAlarm", SnAlarm);
+                    //resultJson.put("SnHistory", SnHistory);
 
                     if (extractedMac != null && extractedMac.equalsIgnoreCase(macAddress)) {
                         // Check if the license is expired
@@ -607,5 +607,19 @@ public class CustomLicenseGenerator {
         }
     }
 
+
+    public static int countComponentsOfType(BComponent root, Class<?> targetType) {
+        int count = 0;
+
+        if (targetType.isInstance(root)) {
+            count++;
+        }
+
+        for (BComponent child : root.getChildComponents()) {
+            count += countComponentsOfType(child, targetType);
+        }
+
+        return count;
+    }
 
 }

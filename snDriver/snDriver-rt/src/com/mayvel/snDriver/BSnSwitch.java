@@ -7,6 +7,7 @@ import javax.baja.nre.annotations.Facet;
 import javax.baja.nre.annotations.NiagaraAction;
 import javax.baja.nre.annotations.NiagaraProperty;
 import javax.baja.nre.annotations.NiagaraType;
+import javax.baja.schedule.BBooleanSchedule;
 import javax.baja.sys.*;
 
 @NiagaraType

@@ -8,6 +8,7 @@ import javax.baja.naming.BOrd;
 import javax.baja.nre.annotations.NiagaraAction;
 import javax.baja.nre.annotations.NiagaraProperty;
 import javax.baja.nre.annotations.NiagaraType;
+import javax.baja.schedule.BBooleanSchedule;
 import javax.baja.sys.*;
 import javax.baja.util.Lexicon;
 
@@ -85,6 +86,12 @@ import java.util.TimerTask;
         flags = Flags.SUMMARY| Flags.READONLY
 )
 @NiagaraProperty(
+        name = "SnSwitchLimit",
+        type = "String",
+        defaultValue = "",
+        flags = Flags.SUMMARY| Flags.READONLY
+)
+@NiagaraProperty(
         name = "out",
         type = "String",
         defaultValue = "",
@@ -103,8 +110,8 @@ public class BSnDriverNetwork
 
 //region /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 //@formatter:off
-/*@ $com.mayvel.snDriver.BSnDriverNetwork(563037370)1.0$ @*/
-/* Generated Fri Jun 13 10:01:03 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
+/*@ $com.mayvel.snDriver.BSnDriverNetwork(4153381786)1.0$ @*/
+/* Generated Mon Jun 16 13:21:06 IST 2025 by Slot-o-Matic (c) Tridium, Inc. 2012-2025 */
 
   //region Property "pollScheduler"
 
@@ -336,6 +343,29 @@ public class BSnDriverNetwork
 
   //endregion Property "SnHistoryLimit"
 
+  //region Property "SnSwitchLimit"
+
+  /**
+   * Slot for the {@code SnSwitchLimit} property.
+   * @see #getSnSwitchLimit
+   * @see #setSnSwitchLimit
+   */
+  public static final Property SnSwitchLimit = newProperty(Flags.SUMMARY | Flags.READONLY, "", null);
+
+  /**
+   * Get the {@code SnSwitchLimit} property.
+   * @see #SnSwitchLimit
+   */
+  public String getSnSwitchLimit() { return getString(SnSwitchLimit); }
+
+  /**
+   * Set the {@code SnSwitchLimit} property.
+   * @see #SnSwitchLimit
+   */
+  public void setSnSwitchLimit(String v) { setString(SnSwitchLimit, v, null); }
+
+  //endregion Property "SnSwitchLimit"
+
   //region Property "out"
 
   /**
@@ -454,23 +484,22 @@ public class BSnDriverNetwork
       // Correctly handle numeric values (convert int to string)
       String SnHttpClient = String.valueOf(json.optInt("SnHttpClient", 0));
       String SnScheduler = String.valueOf(json.optInt("SnScheduler", 0));
-      String SnAlarm = String.valueOf(json.optInt("SnAlarm", 0));
-      String SnHistory = String.valueOf(json.optInt("SnHistory", 0));
+      // String SnAlarm = String.valueOf(json.optInt("SnAlarm", 0));
+      // String SnHistory = String.valueOf(json.optInt("SnHistory", 0));
 
-      int apiTriggeredCount = CustomLicenseGenerator.getHttpRequestCount();
-      int scheduledCount = CustomLicenseGenerator.getAllScheduledCount();
-      int historyApiRequestCount = CustomLicenseGenerator.getAllHistoryApiRequestCount();
-      int alarmRequestCount = CustomLicenseGenerator.getAlarmReceivedCount();
+      int booleanScheduleTC = CustomLicenseGenerator.countComponentsOfType(Sys.getStation(), BBooleanSchedule.class);
+      int snHttpClientTC = CustomLicenseGenerator.countComponentsOfType(Sys.getStation(), BSnHttpClient.class);
 
       // Set values
       setValidFrom(validFrom);
       setValidThru(validThru);
       setPlanName(planName);
 
-      setSnHttpClientLimit(apiTriggeredCount+"/"+SnHttpClient);
-      setSnSchedulerLimit(scheduledCount+"/"+SnScheduler);
-      setSnAlarmLimit(alarmRequestCount+"/"+SnAlarm);
-      setSnHistoryLimit(historyApiRequestCount+"/"+SnHistory);
+      setSnHttpClientLimit(snHttpClientTC+"/"+SnHttpClient);
+      setSnSchedulerLimit(booleanScheduleTC+"/"+SnScheduler);
+      setSnAlarmLimit("Infinite");
+      setSnHistoryLimit("Infinite");
+      setSnSwitchLimit("Infinite");
 
       if (isValid) {
         String message = json.optString("message", "License is valid.");

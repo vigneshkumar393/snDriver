@@ -1,5 +1,8 @@
 package com.mayvel.snDriver;
 
+import com.mayvel.snDriver.utils.CustomLicenseGenerator;
+import com.mayvel.snDriver.utils.Logger;
+
 import javax.baja.nre.annotations.Facet;
 import javax.baja.nre.annotations.NiagaraAction;
 import javax.baja.nre.annotations.NiagaraProperty;
