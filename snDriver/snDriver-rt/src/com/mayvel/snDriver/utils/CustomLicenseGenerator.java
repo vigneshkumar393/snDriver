@@ -673,9 +673,9 @@ public class CustomLicenseGenerator {
         try{
             JSONObject json = new JSONObject(jsonString);
             boolean isValid = json.optBoolean("result", false);
-
+            String message = json.optString("message", "");
             if (!isValid) {
-                return "License is invalid.";
+                return message;
             }
             Class<?> clazz = type.getClass();
             if (CustomLicenseGenerator.isAllowedByCreationOrder(type)) {
