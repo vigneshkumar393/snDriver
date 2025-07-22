@@ -2,6 +2,7 @@ package com.mayvel.snDriver;
 
 import com.mayvel.snDriver.utils.CustomLicenseGenerator;
 import com.mayvel.snDriver.utils.Logger;
+import com.tridium.json.JSONObject;
 
 import javax.baja.nre.annotations.Facet;
 import javax.baja.nre.annotations.NiagaraAction;
@@ -285,13 +286,22 @@ public class BSnHttpClient extends BComponent {
   // Http methods
 
   public void doHttpSend() {
-    new Thread(() -> {
-      try {
-        callHttpSend();  // <-- actual work
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }, "HttpSendThread").start();
+    String result = CustomLicenseGenerator.validateLicenseAndLimit(this);
+    try {
+        if (result.isEmpty()) {
+          new Thread(() -> {
+            try {
+              callHttpSend();  // <-- actual work
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }, "HttpSendThread").start();
+        } else {
+          setHttpOut(result);
+        }
+    }catch (Exception e){
+      setHttpOut(e.toString());
+    }
   }
 
   public void callHttpSend() {

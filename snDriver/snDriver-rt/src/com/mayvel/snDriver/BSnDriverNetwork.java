@@ -487,7 +487,7 @@ public class BSnDriverNetwork
       // String SnAlarm = String.valueOf(json.optInt("SnAlarm", 0));
       // String SnHistory = String.valueOf(json.optInt("SnHistory", 0));
 
-      int booleanScheduleTC = CustomLicenseGenerator.countComponentsOfType(Sys.getStation(), BBooleanSchedule.class);
+      int booleanScheduleTC = CustomLicenseGenerator.countComponentsOfType(Sys.getStation(), BSnScheduler.class);
       int snHttpClientTC = CustomLicenseGenerator.countComponentsOfType(Sys.getStation(), BSnHttpClient.class);
 
       // Set values

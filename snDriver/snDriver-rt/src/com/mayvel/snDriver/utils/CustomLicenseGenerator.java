@@ -1,10 +1,13 @@
 package com.mayvel.snDriver.utils;
 
 import com.mayvel.snDriver.BSnDriverNetwork;
+import com.mayvel.snDriver.BSnHttpClient;
 import com.tridium.json.JSONObject;
 
 import javax.baja.naming.BOrd;
+import javax.baja.sys.BAbsTime;
 import javax.baja.sys.BComponent;
+import javax.baja.sys.BValue;
 import javax.baja.sys.Sys;
 import java.io.*;
 import java.net.NetworkInterface;
@@ -13,6 +16,7 @@ import java.nio.file.attribute.DosFileAttributeView;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CustomLicenseGenerator {
 
@@ -620,6 +624,73 @@ public class CustomLicenseGenerator {
         }
 
         return count;
+    }
+
+    public static boolean isAllowedByCreationOrder(BComponent thisClient) {
+        String jsonString = CustomLicenseGenerator.validateLicense();
+        List<BComponent> allClients = new ArrayList<>();
+        collectComponentsOfType(Sys.getStation(),thisClient.getClass(), allClients);
+        try {
+            JSONObject json = new JSONObject(jsonString);
+            Class<?> clazz = thisClient.getClass();
+
+            int total = CustomLicenseGenerator.countComponentsOfType(Sys.getStation(), thisClient.getClass());
+            int limit = json.optInt( clazz.getSimpleName().substring(1));
+
+            // Sort by slot path string (acts as a proxy for creation order)
+            allClients.sort(Comparator.comparing(comp -> comp.getSlotPath().toString()));
+
+            int index = allClients.indexOf(thisClient);
+            return index > -1 && index < limit;
+        }catch (Exception e){
+           return false;
+        }
+    }
+
+    public static int isAllowedByCreationOrderIndex(BComponent thisClient) {
+        List<BComponent> allClients = new ArrayList<>();
+        collectComponentsOfType(Sys.getStation(), BSnHttpClient.class, allClients);
+
+        // Sort by slot path string (acts as a proxy for creation order)
+        allClients.sort(Comparator.comparing(comp -> comp.getSlotPath().toString()));
+
+        int index = allClients.indexOf(thisClient);
+        return index;
+    }
+
+
+    private static void collectComponentsOfType(BComponent parent, Class<?> targetType, List<BComponent> result) {
+        for (BComponent child : parent.getChildComponents()) {
+            if (targetType.isInstance(child)) {
+                result.add(child);
+            }
+            collectComponentsOfType(child, targetType, result);
+        }
+    }
+
+    public static String validateLicenseAndLimit(BComponent type){
+        String jsonString = CustomLicenseGenerator.validateLicense();
+        try{
+            JSONObject json = new JSONObject(jsonString);
+            boolean isValid = json.optBoolean("result", false);
+
+            if (!isValid) {
+                return "License is invalid.";
+            }
+            Class<?> clazz = type.getClass();
+            if (CustomLicenseGenerator.isAllowedByCreationOrder(type)) {
+
+                return "";
+
+            } else {
+
+                int total = CustomLicenseGenerator.countComponentsOfType(Sys.getStation(), type.getClass());
+                String limit = String.valueOf(json.optInt( clazz.getSimpleName().substring(1), 0));
+                return "❌ " +  clazz.getSimpleName().substring(1) + " limit reached: only first "+limit+" allowed. Current total: " + total;
+            }
+        }catch (Exception e){
+            return e.toString();
+        }
     }
 
 }

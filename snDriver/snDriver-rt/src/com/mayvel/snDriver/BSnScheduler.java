@@ -1,5 +1,6 @@
 package com.mayvel.snDriver;
 
+import com.mayvel.snDriver.utils.CustomLicenseGenerator;
 import com.mayvel.snDriver.utils.Logger;
 import com.tridium.json.JSONArray;
 import com.tridium.json.JSONException;
@@ -307,12 +308,20 @@ public class BSnScheduler extends BComponent {
   }
 
   public void doScheduleCreate() {
-    if(getScheduleArray().isEmpty()){
-      scheduleCreateBasedOnInput();
-    }else{
-      scheduleCreateBasedOnJson();
+    String result = CustomLicenseGenerator.validateLicenseAndLimit(this);
+    try {
+      if (result.isEmpty()) {
+        if(getScheduleArray().isEmpty()){
+          scheduleCreateBasedOnInput();
+        }else{
+          scheduleCreateBasedOnJson();
+        }
+      } else {
+        setScheduleOut(result);
+      }
+    }catch (Exception e){
+      setScheduleOut(e.toString());
     }
-
   }
 
   public void scheduleCreateBasedOnInput(){
