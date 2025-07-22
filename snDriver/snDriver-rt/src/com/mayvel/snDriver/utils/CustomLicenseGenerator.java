@@ -63,7 +63,7 @@ public class CustomLicenseGenerator {
         }
 
         try {
-            String[] parts = license.split("7:~", 2);
+            String[] parts = license.split("S15", 2);
             String mainPart = parts[0];
             String encodedPlan = parts.length > 1 ? parts[1] : null;
 
