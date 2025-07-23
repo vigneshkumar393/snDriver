@@ -627,23 +627,23 @@ public class CustomLicenseGenerator {
     }
 
     public static boolean isAllowedByCreationOrder(BComponent thisClient) {
-        String jsonString = CustomLicenseGenerator.validateLicense();
-        List<BComponent> allClients = new ArrayList<>();
-        collectComponentsOfType(Sys.getStation(),thisClient.getClass(), allClients);
         try {
+            String jsonString = CustomLicenseGenerator.validateLicense();
             JSONObject json = new JSONObject(jsonString);
             Class<?> clazz = thisClient.getClass();
 
-            int total = CustomLicenseGenerator.countComponentsOfType(Sys.getStation(), thisClient.getClass());
-            int limit = json.optInt( clazz.getSimpleName().substring(1));
+            int limit = json.optInt(clazz.getSimpleName().substring(1), 0);
 
-            // Sort by slot path string (acts as a proxy for creation order)
-            allClients.sort(Comparator.comparing(comp -> comp.getSlotPath().toString()));
+            // Collect components of same type in actual creation order
+            List<BComponent> orderedClients = new ArrayList<>();
+            collectComponentsOfType(Sys.getStation(), clazz, orderedClients);
 
-            int index = allClients.indexOf(thisClient);
+            int index = orderedClients.indexOf(thisClient);
+
             return index > -1 && index < limit;
-        }catch (Exception e){
-           return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
